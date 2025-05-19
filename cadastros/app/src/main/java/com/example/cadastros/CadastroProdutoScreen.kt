@@ -20,7 +20,6 @@ class produto {
     val precoCusto = Double
     val precoVenda = Double
     val nomeMarca = String
-
 }
 
 @Composable
