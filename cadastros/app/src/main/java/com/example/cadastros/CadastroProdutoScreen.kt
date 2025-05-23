@@ -1,8 +1,5 @@
 package com.example.cadastros
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -13,14 +10,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 
+class Produto(
+    var nome: String,
+    var quantidade: Int?,
+    var precoCusto: Double?,
+    var precoVenda: Double?,
+    var marca: String
+)
+
 @Composable
 fun CadastroProdutoScreen() {
-
     var nomeProduto by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
     var precoCusto by remember { mutableStateOf("") }
     var precoVenda by remember { mutableStateOf("") }
     var marca by remember { mutableStateOf("") }
+
+    var validator by remember { mutableStateOf(false) }
+    var message  by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -43,7 +50,14 @@ fun CadastroProdutoScreen() {
             onValueChange = { nomeProduto = it },
             label = { Text("Nome do produto") },
             keyboardOptions = KeyboardOptions.Default,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = nomeProdutoValidator(nomeProduto, validator) != null,
+            supportingText = {
+                val errors = nomeProdutoValidator(nomeProduto, validator)
+                if (errors != null) {
+                    Text(errors);
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -54,7 +68,14 @@ fun CadastroProdutoScreen() {
             onValueChange = { quantidade = it },
             label = { Text("Quantidade em estoque") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = quantidadeProdutoValidator(quantidade, validator) != null,
+            supportingText = {
+                val errors = quantidadeProdutoValidator(quantidade, validator);
+                if (errors != null) {
+                    Text(errors)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -62,10 +83,17 @@ fun CadastroProdutoScreen() {
         // Preço de custo
         OutlinedTextField(
             value = precoCusto,
-            onValueChange = { precoCusto = it },
+            onValueChange = { precoCusto =  it },
             label = { Text("Preço de custo") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = precoCustoProdutoValidator(precoCusto, validator) != null,
+            supportingText = {
+                val erros = precoCustoProdutoValidator(precoCusto, validator);
+                if (erros != null) {
+                    Text(erros)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -76,7 +104,15 @@ fun CadastroProdutoScreen() {
             onValueChange = { precoVenda = it },
             label = { Text("Preço de venda") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
+            isError = precoVendaProdutoValidator(precoVenda, validator) != null,
+            supportingText = {
+                val erros = precoVendaProdutoValidator(precoVenda, validator)
+
+                if (erros != null) {
+                    Text(erros)
+                }
+            }
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -98,18 +134,111 @@ fun CadastroProdutoScreen() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(onClick = {
-                // Ação de salvar
+                val produto = Produto(
+                    nomeProduto,
+                    quantidade.toIntOrNull(),
+                    precoCusto.toDoubleOrNull(),
+                    precoVenda.toDoubleOrNull(),
+                    marca
+                )
+                validator = true
+                if (onSave(produto)) {
+                    message = "Salvo com sucesso"
+                } else {
+                    message = "Prencha os campos"
+                }
+
             }) {
                 Text("Salvar")
             }
 
             OutlinedButton(onClick = {
-                // Ação de cancelar
+                nomeProduto = "";
+                quantidade = "";
+                precoCusto = "";
+                precoVenda = "";
+                marca = "";
+                validator = false
+                message = "";
             }) {
                 Text("Cancelar")
             }
         }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Text(message)
+
     }
+}
+
+fun nomeProdutoValidator(value : String?, validator : Boolean): String? {
+    if (value.isNullOrEmpty() && validator) {
+        return "O nome do produto não pode ser vazio";
+    }
+
+    if (value!!.length <= 3 && validator) {
+        return "O nome do produto deve conter 3 caracteres";
+    }
+    return null
+}
+
+fun quantidadeProdutoValidator(value : String?, validator : Boolean): String? {
+    if ((value.isNullOrBlank() || value == "null") && validator) {
+        return "A quantidade do produto não pode ser vazio";
+    }
+
+    if (value!!.isEmpty()  && validator) {
+        return "A quantidade do produto não pode ser vazio";
+    }
+
+    if (value.isNotEmpty() && value.toInt() < 0) {
+        return "Informe uma quantidade maior que 0"
+    }
+
+    return null;
+}
+
+fun precoCustoProdutoValidator(value : String?, validator : Boolean): String? {
+    if ((value.isNullOrBlank() || value == "null") && validator) {
+        return "O preço custo do produto não pode ser vazio"
+    }
+
+    if (value.isNullOrEmpty() && validator) {
+        return "O preço custo do produto não pode ser vazio"
+    }
+
+    if (value!!.isNotEmpty() && value.toDouble() < 0) {
+        return "Informe um custo produto maior que 0"
+    }
+
+    return null;
+}
+
+fun precoVendaProdutoValidator(value : String, validator : Boolean) : String? {
+    if (value.isEmpty()) {
+        return null
+    }
+
+    if (value != "null" && value.toDouble() < 0) {
+        return "Informe um preço venda maior que 0"
+    }
+
+    return null;
+}
+
+
+fun onSave(produto : Produto) : Boolean {
+    //NOME MAIOR QUE 3 CARACTES
+    //QTD MAIOR QUE 0
+    //PREÇO DO CUSTO > 0 E != DE NULL
+    //PREÇO DE VENDA PODE SER NULL > 0
+    val  nomeProdutoValidator = nomeProdutoValidator(produto.nome, true) != null
+    val  quantidadeProdutoValidator = quantidadeProdutoValidator(produto.quantidade.toString(), true) != null
+    val  precoCustoProdutoValidator =precoCustoProdutoValidator(produto.precoCusto.toString(), true) != null
+    val  precoVendaProdutoValidator = precoVendaProdutoValidator(produto.precoVenda.toString(), true) != null
+
+    return !(nomeProdutoValidator || quantidadeProdutoValidator || precoCustoProdutoValidator || precoVendaProdutoValidator);
 }
 
 @Preview(showBackground = true)
