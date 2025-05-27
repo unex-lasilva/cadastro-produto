@@ -1,22 +1,28 @@
 package com.example.cadastros
 
-
-import android.R
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
 @Composable
-fun CadastroProdutoScreen() {
+fun CadastroProdutoScreen(
+    navController: NavHostController,
+    viewModel: ProdutoViewModel
+) {
 
     var nomeProduto by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
@@ -44,7 +50,9 @@ fun CadastroProdutoScreen() {
         // Título
         Text(
             text = "Cadastro de produto",
+            color = Color.DarkGray,
             fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold,
             modifier = Modifier
                 .padding(top = 16.dp, start = 8.dp)
         )
@@ -92,7 +100,7 @@ fun CadastroProdutoScreen() {
                 precoCusto = it
                 erroPrecoCusto = null},
             label = { Text("Preço de custo") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             isError = erroPrecoCusto != null,
             modifier = Modifier.fillMaxWidth()
         )
@@ -109,7 +117,7 @@ fun CadastroProdutoScreen() {
                 precoVenda = it
                 erroPrecoVenda = null},
             label = { Text("Preço de venda") },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             isError = erroPrecoVenda != null,
             modifier = Modifier.fillMaxWidth()
         )
@@ -146,19 +154,19 @@ fun CadastroProdutoScreen() {
 
                 val qtd = quantidade.toIntOrNull()
                 if (qtd == null || qtd <= 0){
-                    erroQtd = "Quantidade deve ser um número maior que 0."
+                    erroQtd = "Quantidade deve ser um número inteiro maior que 0."
                     isValid = false
                 }
 
                 if (precoCusto.isNotEmpty()){
-                    val custo = precoCusto.toBigDecimalOrNull()
+                    val custo = precoCusto.replace(',', '.').toBigDecimalOrNull()
                     if (custo == null || custo <= BigDecimal.ZERO){
                         erroPrecoCusto = "Preço de custo deve ser maior que 0."
                         isValid = false
                     }
                 }
 
-                val venda = precoVenda.toBigDecimalOrNull()
+                val venda = precoVenda.replace(',', '.').toBigDecimalOrNull()
                 if (venda == null || venda <= BigDecimal.ZERO){
                     erroPrecoVenda = "Preço de venda deve ser maior que 0."
                     isValid = false
@@ -166,36 +174,41 @@ fun CadastroProdutoScreen() {
 
                 if (isValid) {
                     val produto = Produto(
+                        id = 0, // o valor de id será atualizado no ViewModel
                         nome = nomeProduto,
                         qtd = quantidade.toInt(),
-                        precoProduto = precoCusto.toBigDecimalOrNull() ?: BigDecimal.ZERO,
-                        precoVenda = precoVenda.toBigDecimal(),
+                        precoProduto = precoCusto.replace(',', '.').toBigDecimalOrNull() ?: BigDecimal.ZERO,
+                        precoVenda = precoVenda.replace(',', '.').toBigDecimalOrNull() ?: BigDecimal.ZERO,
                         marca = marca
                     )
 
-                    val mensagemSnackbar = "Produto: '${produto.nome}' Salvo com Sucesso! Quantidade: ${produto.qtd}, Preço de Venda: R$ ${produto.precoVenda}"
+                    // Adiciona o produto no ViewModel
+                    viewModel.adicionarProduto(produto)
 
+                    // Mensagem Após Salvamento
                     coroutineScope.launch {
-                        snackbarHostState.showSnackbar(mensagemSnackbar)
+                        snackbarHostState.showSnackbar("Produto salvo!")
                     }
+
+                    // Navega para a tela de informação após a ação de salvar
+                    navController.navigate(MarketScreen.InfoProduto.toString())
                 }
-            }) {
+            },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4CAF50)),
+                shape = RoundedCornerShape(5.dp),
+                border = BorderStroke(2.dp, Color(0xFF4F8651))
+                ) {
                 Text("Salvar")
             }
 
             OutlinedButton(onClick = {
-                nomeProduto = ""
-                quantidade = ""
-                precoCusto = ""
-                precoVenda = ""
-                marca = ""
-
-                erroNome = null
-                erroQtd = null
-                erroPrecoCusto = null
-                erroPrecoVenda = null
-            }) {
-                Text("Cancelar")
+                navController.popBackStack()
+            },
+                shape = RoundedCornerShape(5.dp),
+                border = BorderStroke(2.dp, Color.Gray)
+            ) {
+                Text("Cancelar", color = Color.DarkGray)
             }
         }
     }
@@ -204,6 +217,7 @@ fun CadastroProdutoScreen() {
 
 @Preview(showBackground = true)
 @Composable
-fun CadastroProdutoPreview() {
-    CadastroProdutoScreen()
+fun ViewCadastroProduto() {
+    CadastroProdutoScreen(navController = rememberNavController(), viewModel = remember { ProdutoViewModel() })
 }
+
