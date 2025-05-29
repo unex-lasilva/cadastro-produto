@@ -4,13 +4,15 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.tooling.preview.Preview
 
-class Produto(
+import androidx.navigation.NavController
+
+ class Produto(
     var nome: String,
     var quantidade: Int?,
     var precoCusto: Double?,
@@ -19,7 +21,7 @@ class Produto(
 )
 
 @Composable
-fun CadastroProdutoScreen() {
+fun CadastroProdutoScreen(navController: NavController) {
     var nomeProduto by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
     var precoCusto by remember { mutableStateOf("") }
@@ -144,6 +146,8 @@ fun CadastroProdutoScreen() {
                 validator = true
                 if (onSave(produto)) {
                     message = "Salvo com sucesso"
+                    val path = "/${produto.nome}/${produto.quantidade}/${produto.precoCusto}/${produto.precoVenda}/${produto.marca}"
+                    navController.navigate(MarketScreen.InfoProduto.toString()+path)
                 } else {
                     message = "Prencha os campos"
                 }
@@ -167,7 +171,13 @@ fun CadastroProdutoScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        Text(message)
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .align(Alignment.CenterHorizontally)
+        ) {
+            Text(message)
+        }
+
 
     }
 }
@@ -239,10 +249,4 @@ fun onSave(produto : Produto) : Boolean {
     val  precoVendaProdutoValidator = precoVendaProdutoValidator(produto.precoVenda.toString(), true) != null
 
     return !(nomeProdutoValidator || quantidadeProdutoValidator || precoCustoProdutoValidator || precoVendaProdutoValidator);
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CadastroProdutoPreview() {
-    CadastroProdutoScreen()
 }
