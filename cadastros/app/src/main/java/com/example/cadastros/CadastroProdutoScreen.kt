@@ -13,6 +13,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 
+// Função de validação
+fun isValid(nome: String, quantidade: Int, precoCusto: String, precoVenda: String): Boolean {
+    val precoCustoValido = precoCusto.isEmpty() || (precoCusto.toDoubleOrNull() ?: -1.0) > 0
+    return nome.length > 3 &&
+            quantidade > 0 &&
+            precoCustoValido &&
+            (precoVenda.toDoubleOrNull() ?: -1.0) > 0
+}
+
+// Classe Produto
+data class Produto(
+    val nome: String,
+    val quantidade: Int,
+    val precoCusto: Double?,
+    val precoVenda: Double,
+    val marca: String?
+)
+
 @Composable
 fun CadastroProdutoScreen() {
 
@@ -21,6 +39,8 @@ fun CadastroProdutoScreen() {
     var precoCusto by remember { mutableStateOf("") }
     var precoVenda by remember { mutableStateOf("") }
     var marca by remember { mutableStateOf("") }
+
+    var errorMessage by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -90,6 +110,15 @@ fun CadastroProdutoScreen() {
             modifier = Modifier.fillMaxWidth()
         )
 
+        // Exibindo mensagem de erro
+        if (errorMessage.isNotEmpty()) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(top = 8.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(32.dp))
 
         // Botões
@@ -98,7 +127,33 @@ fun CadastroProdutoScreen() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(onClick = {
-                // Ação de salvar
+                // Converte os valores para os tipos adequados
+                val qtd = quantidade.toIntOrNull() ?: -1
+                val custo = precoCusto.toDoubleOrNull()
+                val venda = precoVenda.toDoubleOrNull() ?: -1.0
+
+                val produto = Produto(
+                    nome = nomeProduto.trim(),
+                    quantidade = qtd,
+                    precoCusto = custo,
+                    precoVenda = venda,
+                    marca = if (marca.isBlank()) null else marca.trim()
+                )
+                println("Nome do Produto: ${produto.nome}")
+                println("Quantidade: ${produto.quantidade}")
+                println("Preço de Custo: ${produto.precoCusto}")
+                println("Preço de Venda: ${produto.precoVenda}")
+                println("Marca: ${produto.marca}")
+
+                // Valida o produto
+                if (isValid(produto.nome, produto.quantidade, precoCusto, precoVenda)) {
+                    // Produto válido, prossiga com o cadastro
+                    errorMessage = "" // Limpa a mensagem de erro
+                    println("Produto válido: $produto")
+                } else {
+                    // Produto inválido, exibe a mensagem de erro
+                    errorMessage = "Por favor, preencha todos os campos corretamente."
+                }
             }) {
                 Text("Salvar")
             }
@@ -109,6 +164,7 @@ fun CadastroProdutoScreen() {
                 Text("Cancelar")
             }
         }
+
     }
 }
 
