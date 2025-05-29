@@ -46,6 +46,7 @@ fun InfoProdutoScreen(
     navController: NavController,
     viewModel: ProdutoViewModel
 ) {
+    // extração dos valores (diretamente com by) para armazenar os valores de cada produto após ser adicionado
     val listaProdutos by viewModel.produtos.collectAsState()
 
     Scaffold(
@@ -57,6 +58,7 @@ fun InfoProdutoScreen(
                 Spacer(modifier = Modifier.weight(0.14f))
                 // Botão de voltar
                 IconButton(onClick = {
+                    // uso do popBackStack para voltar a tela anterior, e com o inclusive = false para manter a tela de destino no histórico de navegação
                     navController.popBackStack(MarketScreen.Home.toString(), inclusive = false)
                 },
                     modifier = Modifier.size(56.dp)
@@ -75,6 +77,7 @@ fun InfoProdutoScreen(
                 // Botão para adicionar produtos
                 Button(
                     onClick = {
+                        // volta a tela de cadastro de produto
                         navController.navigate(MarketScreen.CadastroProduto.toString())
                     },
                     shape = CircleShape,
@@ -94,7 +97,7 @@ fun InfoProdutoScreen(
         }
     ) { innerPadding ->
 
-        // Coluna para a lista dos produtos
+        // Lista rolável na vertical
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -125,8 +128,9 @@ fun InfoProdutoScreen(
                 }
             } else {
                 // Senão, exibe os produtos
+                // itera sobre cada produto e os exibe em um card utilizando a função ProdutoCard
                 items(listaProdutos) { produto ->
-                    ProdutoCard(produto, onRemove = { produtoRemover ->
+                    ProdutoCard(produto, onRemove = { produtoRemover -> // função callback usada para chamar a função removerProduto
                         viewModel.removerProduto(produtoRemover)
                     })
                 }
@@ -149,6 +153,7 @@ fun ProdutoCard(produto: Produto, onRemove: (Produto) -> Unit){
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
+            // lista de chave e valor
             val dados = listOf(
                 "ID" to produto.id.toString(),
                 "Nome" to produto.nome,
@@ -158,6 +163,7 @@ fun ProdutoCard(produto: Produto, onRemove: (Produto) -> Unit){
                 "Marca" to produto.marca
             )
 
+            // uso do foEachIndexed para percorrer cada item da lista de dados
             dados.forEachIndexed { index, (chave, valor) ->
                 val isId = chave == "ID"
                 Row(

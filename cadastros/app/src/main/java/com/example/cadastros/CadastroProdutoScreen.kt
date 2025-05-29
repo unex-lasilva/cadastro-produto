@@ -24,17 +24,20 @@ fun CadastroProdutoScreen(
     viewModel: ProdutoViewModel
 ) {
 
+    // variaveis remember para cada campo de cadastro
     var nomeProduto by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
     var precoCusto by remember { mutableStateOf("") }
     var precoVenda by remember { mutableStateOf("") }
     var marca by remember { mutableStateOf("") }
 
+    // variaveis que guargam mensagens de erro para mostrar abaixo dos campos
     var erroNome  by remember { mutableStateOf<String?>(null) }
     var erroQtd by remember { mutableStateOf<String?>(null) }
     var erroPrecoCusto by remember { mutableStateOf<String?>(null) }
     var erroPrecoVenda by remember { mutableStateOf<String?>(null) }
 
+    // snackbar utilizada para aparecer temporariamente na tela alguma mensagem, como a de "produto salvo!"
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 

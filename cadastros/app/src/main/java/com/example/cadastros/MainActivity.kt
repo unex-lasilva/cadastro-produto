@@ -25,17 +25,19 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNavigation(){
-    val navController = rememberNavController()
-    val viewModel = remember { ProdutoViewModel() }
+    val navController = rememberNavController() // criação da variavel que guarda o controle da navegação entre as telas
+    val viewModel = remember { ProdutoViewModel() } // variavel que é um viewModel para armazenar os dados dos produtos
 
+    // componente que cuida das rotas das telas
     NavHost(
         navController = navController,
-        startDestination = MarketScreen.Home.toString()
+        startDestination = MarketScreen.Home.toString() // tela inical da aplicação
     ){
+        // criação de composable route para ir passando para o navController a rota atual da aplicação
         composable(MarketScreen.Home.toString()){
             HomeScreen(navController)
         }
-
+        // nas rotas abaixo é passado o viewModel para guardar os dados fornecidos durante a navegação entre as telas
         composable(MarketScreen.CadastroProduto.toString()) {
             CadastroProdutoScreen(navController, viewModel)
         }
