@@ -12,6 +12,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
 
 // Função de validação
 fun isValid(nome: String, quantidade: Int, precoCusto: String, precoVenda: String): Boolean {
@@ -32,7 +33,7 @@ data class Produto(
 )
 
 @Composable
-fun CadastroProdutoScreen() {
+fun CadastroProdutoScreen(navController : NavController) {
 
     var nomeProduto by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
@@ -154,6 +155,8 @@ fun CadastroProdutoScreen() {
                     // Produto inválido, exibe a mensagem de erro
                     errorMessage = "Por favor, preencha todos os campos corretamente."
                 }
+                val path = "/${produto.nome}/${produto.quantidade}/${produto.precoCusto}/${produto.precoVenda}/${produto.marca}"
+                navController.navigate(MarketScreen.InfoProduto.toString()+path)
             }) {
                 Text("Salvar")
             }
@@ -166,10 +169,4 @@ fun CadastroProdutoScreen() {
         }
 
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun CadastroProdutoPreview() {
-    CadastroProdutoScreen()
 }
