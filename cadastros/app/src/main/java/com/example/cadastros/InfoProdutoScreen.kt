@@ -5,6 +5,8 @@ import androidx.navigation.NavController
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 
 @Composable
 fun InfoProdutoScreen(
@@ -14,7 +16,11 @@ fun InfoProdutoScreen(
     precoVenda: String,
     marca: String
 ) {
-    Column {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
         Text("Nome: $nome")
         Text("Quantidade: $quantidade")
         Text("Preço de Custo: $precoCusto")
