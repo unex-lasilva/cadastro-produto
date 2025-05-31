@@ -14,9 +14,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
-fun CadastroProdutoScreen() {
+fun CadastroProdutoScreen(navController: NavController, produtos:MutableList<Produto>) {
 
     var nomeProduto by remember { mutableStateOf("") }
     var quantidade by remember { mutableStateOf("") }
@@ -30,7 +32,6 @@ fun CadastroProdutoScreen() {
     val isPrecoVendaValido = precoVenda.toDoubleOrNull()?.let { it > 0 } == true
     var formSubmited by remember { mutableStateOf(false) }
     var enviou by remember { mutableStateOf(false) }
-    var produto by remember { mutableStateOf<Produto?>(null) }
 
 
     Column(
@@ -53,14 +54,14 @@ fun CadastroProdutoScreen() {
             value = nomeProduto,
             onValueChange = {
                     nomeProduto = it
-
             },
             label = { Text("Nome do produto") },
             keyboardOptions = KeyboardOptions.Default,
             modifier = Modifier.fillMaxWidth()
         )
 
-        if ((nomeProduto.length < 3) && (formSubmited || nomeProduto.isNotEmpty())) {            Text(
+        if ((nomeProduto.length < 3) && (formSubmited || nomeProduto.isNotEmpty())) {
+            Text(
                 text = "O nome do produto deve ter pelo menos 3 caracteres",
                 color = Color.Red,
                 style = MaterialTheme.typography.bodySmall
@@ -74,7 +75,6 @@ fun CadastroProdutoScreen() {
             value = quantidade,
             onValueChange = {
                     quantidade = it
-
             },
             label = { Text("Quantidade em estoque") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -98,7 +98,6 @@ fun CadastroProdutoScreen() {
             value = precoCusto,
             onValueChange = {
                     precoCusto = it
-
             },
             label = { Text("Preço de custo") },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -107,7 +106,7 @@ fun CadastroProdutoScreen() {
 
         val precoCustoDoub = precoCusto.toDoubleOrNull()
 
-        if (precoCusto.isNotEmpty() && (precoCustoDoub == null || precoCustoDoub <= 0)) {
+        if (precoCusto.isNotBlank() && (precoCustoDoub == null || precoCustoDoub <= 0)) {
                 Text(
                     text = "O produto deve ter um custo maior que zero",
                     color = Color.Red,
@@ -160,21 +159,16 @@ fun CadastroProdutoScreen() {
                 formSubmited = true
                 if (isNomeValido && isQuantidadeValida && isPrecoCustoValido && isPrecoVendaValido) {
                     enviou = true
-                    produto = Produto(nomeProduto, quantidadeint, precoCustoDoub, precoVendaDoub, marca)
-
+                    val produto = Produto(nomeProduto, quantidadeint, precoCustoDoub, precoVendaDoub, marca)
+                    produtos.add(produto)
                 }
+
             }) {
                 Text("Salvar")
             }
 
             OutlinedButton(onClick = {
-                nomeProduto = ""
-                quantidade = ""
-                precoCusto = ""
-                precoVenda = ""
-                marca = ""
-                formSubmited = false
-                enviou = false
+                navController.popBackStack()
             }) {
                 Text("Cancelar")
             }
@@ -194,6 +188,9 @@ fun CadastroProdutoScreen() {
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
+            LaunchedEffect(Unit) {
+                navController.navigate(MarketScreen.Registro.toString())
+            }
         }
     }
 }
@@ -202,5 +199,5 @@ fun CadastroProdutoScreen() {
 @Preview(showBackground = true)
 @Composable
 fun CadastroProdutoPreview() {
-    CadastroProdutoScreen()
+    CadastroProdutoScreen(rememberNavController(), produtos = mutableListOf<Produto>())
 }
